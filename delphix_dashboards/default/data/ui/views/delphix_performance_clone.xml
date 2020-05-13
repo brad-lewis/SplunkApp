@@ -14,7 +14,7 @@
       <fieldForLabel>host</fieldForLabel>
       <fieldForValue>host</fieldForValue>
       <search>
-        <query>| mcatalog values(host) AS host | mvexpand host | sort "host" | table "host"</query>
+        <query>| mcatalog values(host) AS host where `delphix_metrics_index` | mvexpand host | sort "host" | table "host"</query>
         <earliest>-24h@h</earliest>
         <latest>now</latest>
       </search>
@@ -27,7 +27,7 @@
       <title>CPU Trend</title>
       <single>
         <search>
-          <query>|mstats avg(_value) AS cpu where host="$host$" metric_name="system.cpu.util.pct" span=1s | timechart span=5m perc85(cpu)</query>
+          <query>|mstats avg(_value) AS cpu where `delphix_metrics_index` AND host="$host$" metric_name="system.cpu.util.pct" span=1s | timechart span=5m perc85(cpu)</query>
           <earliest>$timeRange.earliest$</earliest>
           <latest>$timeRange.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -58,7 +58,7 @@
       <title>Network Trend</title>
       <single>
         <search>
-          <query>| mstats avg(_value) AS NetworkBytes where host="$host$" metric_name= system.net.total.bytes span=1s | eval NetworkMB = NetworkBytes / 1024 / 1024 | timechart span=5m perc85(NetworkMB) AS "Network MB"</query>
+          <query>| mstats avg(_value) AS NetworkBytes where `delphix_metrics_index` AND host="$host$" metric_name= system.net.total.bytes span=1s | eval NetworkMB = NetworkBytes / 1024 / 1024 | timechart span=5m perc85(NetworkMB) AS "Network MB"</query>
           <earliest>$timeRange.earliest$</earliest>
           <latest>$timeRange.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -89,7 +89,7 @@
       <title>Disk Latency Trend</title>
       <single>
         <search>
-          <query>| mstats avg(_value) where host="$host$" metric_name="system.disk.*" span=1s by data.op, data.avgLatency| eval op = 'data.op' | eval latency = round('data.avgLatency' / 1000000, 2) | timechart span=5m perc85(latency) by op</query>
+          <query>| mstats avg(_value) where `delphix_metrics_index` AND host="$host$" metric_name="system.disk.*" span=1s by data.op, data.avgLatency| eval op = 'data.op' | eval latency = round('data.avgLatency' / 1000000, 2) | timechart span=5m perc85(latency) by op</query>
           <earliest>$timeRange.earliest$</earliest>
           <latest>$timeRange.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -120,7 +120,7 @@
       <title>Disk Throughput Trend</title>
       <single>
         <search>
-          <query>| mstats avg(_value) where host="$host$" metric_name="system.disk.*" span=1s by data.op, data.throughput | eval op = 'data.op' | eval thruput= round('data.throughput' / 1024, 2) | timechart span=5m perc85(thruput) by op</query>
+          <query>| mstats avg(_value) where `delphix_metrics_index` AND host="$host$" metric_name="system.disk.*" span=1s by data.op, data.throughput | eval op = 'data.op' | eval thruput= round('data.throughput' / 1024, 2) | timechart span=5m perc85(thruput) by op</query>
           <earliest>$timeRange.earliest$</earliest>
           <latest>$timeRange.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -154,7 +154,7 @@
       <title>CPU utilization</title>
       <chart>
         <search>
-          <query>| mstats perc85(_value) AS val85 avg(_value) AS val where host="$host$" metric_name="system.cpu.*" span=1m by data.kernel, data.user, data.idle | eval sys='data.kernel'/1000 | eval usr='data.user'/1000 | eval idle='data.idle'/1000 | timechart span=10m avg(val) as "cpu.overall", avg(val85) as "cpu.overall 85th Percentile", avg(sys) as "cpu.system", avg(usr) as "cpu.user", avg(idle) as "cpu.idle"</query>
+          <query>| mstats perc85(_value) AS val85 avg(_value) AS val where `delphix_metrics_index` AND host="$host$" metric_name="system.cpu.*" span=1m by data.kernel, data.user, data.idle | eval sys='data.kernel'/1000 | eval usr='data.user'/1000 | eval idle='data.idle'/1000 | timechart span=10m avg(val) as "cpu.overall", avg(val85) as "cpu.overall 85th Percentile", avg(sys) as "cpu.system", avg(usr) as "cpu.user", avg(idle) as "cpu.idle"</query>
           <earliest>$timeRange.earliest$</earliest>
           <latest>$timeRange.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -199,7 +199,7 @@
       <title>Network Interface Utilization (Bytes and Packets)</title>
       <chart>
         <search>
-          <query>| mstats avg(_value) as Total where metric_name="system.net.total.bytes" host="$host$" span=1s by data.outBytes , data.inBytes, data.networkInterface  data.outPackets , data.inPackets | eval name='data.networkInterface' | eval pout='data.outPackets' | eval pin='data.inPackets' | eval KB_Out = round('data.outBytes' /1024, 2) | eval KB_In = round('data.inBytes' /1024,2) | timechart span=10m avg(KB_Out) AS "KB Out", avg(KB_In) AS "KB In" avg(pout) AS "# Packets Out", avg(pin) AS "# Packets In" by name</query>
+          <query>| mstats avg(_value) as Total where `delphix_metrics_index` AND metric_name="system.net.total.bytes" host="$host$" span=1s by data.outBytes , data.inBytes, data.networkInterface  data.outPackets , data.inPackets | eval name='data.networkInterface' | eval pout='data.outPackets' | eval pin='data.inPackets' | eval KB_Out = round('data.outBytes' /1024, 2) | eval KB_In = round('data.inBytes' /1024,2) | timechart span=10m avg(KB_Out) AS "KB Out", avg(KB_In) AS "KB In" avg(pout) AS "# Packets Out", avg(pin) AS "# Packets In" by name</query>
           <earliest>$timeRange.earliest$</earliest>
           <latest>$timeRange.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -245,7 +245,7 @@
       <title>Disk Operations</title>
       <chart>
         <search>
-          <query>| mstats avg(_value) as io_count where metric_name="system.disk.ops.count" host="$host$" span=1s by data.op, data.avgLatency, data.throughput | eval operation='data.op' | eval latency = ('data.avgLatency' / 1000000) | eval thruput= round('data.throughput' / 1024 , 2) | timechart span=20m avg(io_count) as "I/O count", avg(latency) as "AvgLatency (ms)", avg(thruput) as "Throughput (KB)" by operation</query>
+          <query>| mstats avg(_value) as io_count where `delphix_metrics_index` AND metric_name="system.disk.ops.count" host="$host$" span=1s by data.op, data.avgLatency, data.throughput | eval operation='data.op' | eval latency = ('data.avgLatency' / 1000000) | eval thruput= round('data.throughput' / 1024 , 2) | timechart span=20m avg(io_count) as "I/O count", avg(latency) as "AvgLatency (ms)", avg(thruput) as "Throughput (KB)" by operation</query>
           <earliest>$timeRange.earliest$</earliest>
           <latest>$timeRange.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -294,7 +294,7 @@
       <chart>
         <title>Usage (MB)</title>
         <search>
-          <query>| mstats avg(_value) as current where host="$host$" metric_name="system.capacity.consumer.size" span=30s by data.totalSpace, data.consumerName | eval usage = round((current) / 1024 /1024, 2) | eval totalGB=round('data.totalSpace' / 1024 / 1024 / 1024, 3) | eval name = 'data.consumerName'| chart avg(usage) as "Usage (MB)" avg(totalGB) as "Total (GB)" by name</query>
+          <query>| mstats avg(_value) as current where `delphix_metrics_index` AND host="$host$" metric_name="system.capacity.consumer.size" span=30s by data.totalSpace, data.consumerName | eval usage = round((current) / 1024 /1024, 2) | eval totalGB=round('data.totalSpace' / 1024 / 1024 / 1024, 3) | eval name = 'data.consumerName'| chart avg(usage) as "Usage (MB)" avg(totalGB) as "Total (GB)" by name</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
           <refresh>30m</refresh>
@@ -319,7 +319,7 @@
       <title>NFS Operations</title>
       <chart>
         <search>
-          <query>| mstats avg(_value) as io_count where metric_name="system.nfs.ops.count" host="$host$" span=1s by data.op, data.avgLatency, data.throughput | eval operation='data.op' | eval latency = ('data.avgLatency' / 1000000) | eval thruput= round('data.throughput' / 1024 , 2) | timechart span=20m avg(io_count) as "I/O count", avg(latency) as "AvgLatency (ms)", avg(thruput) as "Throughput (KB)" by operation</query>
+          <query>| mstats avg(_value) as io_count where `delphix_metrics_index` AND metric_name="system.nfs.ops.count" host="$host$" span=1s by data.op, data.avgLatency, data.throughput | eval operation='data.op' | eval latency = ('data.avgLatency' / 1000000) | eval thruput= round('data.throughput' / 1024 , 2) | timechart span=20m avg(io_count) as "I/O count", avg(latency) as "AvgLatency (ms)", avg(thruput) as "Throughput (KB)" by operation</query>
           <earliest>$timeRange.earliest$</earliest>
           <latest>$timeRange.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -365,7 +365,7 @@
       <title>Dataset Performance</title>
       <chart>
         <search>
-          <query>| mstats avg(_value) as Val where host="$host$" metric_name="system.dataset.total.bytes" span=1s by data.dataset, data.nread, data.nwritten, data.type
+          <query>| mstats avg(_value) as Val where `delphix_metrics_index` AND host="$host$" metric_name="system.dataset.total.bytes" span=1s by data.dataset, data.nread, data.nwritten, data.type
 | eval dataset='data.dataset' 
 | eval nread='data.nread' 
 | eval nwritten='data.nwritten' 
@@ -422,7 +422,7 @@
       <title>iSCSI Operations</title>
       <chart>
         <search>
-          <query>| mstats avg(_value) as io_count where metric_name="system.iscsi.ops.count" host="$host$" span=1s by data.op, data.avgLatency, data.throughput | eval operation='data.op' | eval latency = ('data.avgLatency' / 1000000) | eval thruput= round('data.throughput' / 1024 , 2) | timechart span=10m avg(io_count) as "I/O count", avg(latency) as "AvgLatency (ms)", avg(thruput) as "Throughput (KB)" by operation</query>
+          <query>| mstats avg(_value) as io_count where `delphix_metrics_index` AND metric_name="system.iscsi.ops.count" host="$host$" span=1s by data.op, data.avgLatency, data.throughput | eval operation='data.op' | eval latency = ('data.avgLatency' / 1000000) | eval thruput= round('data.throughput' / 1024 , 2) | timechart span=10m avg(io_count) as "I/O count", avg(latency) as "AvgLatency (ms)", avg(thruput) as "Throughput (KB)" by operation</query>
           <earliest>$timeRange.earliest$</earliest>
           <latest>$timeRange.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -452,7 +452,7 @@
       <title>TCP by service</title>
       <chart>
         <search>
-          <query>| mstats avg(_value) as Val where host="$host$" metric_name="system.tcp.total.bytes" span=1m by data.localAddress, data.remoteAddress, data.service, data.inBytes, data.outBytes | eval svc='data.service'| eval in='data.inBytes' | eval out='data.outBytes' | eval rmt='data.remoteAddress' | eval valmb=(Val / 1024 / 1024) | timechart span=1h avg(valmb) as "Bytes(MB)" by svc</query>
+          <query>| mstats avg(_value) as Val where host="$host$" `delphix_metrics_index` AND metric_name="system.tcp.total.bytes" span=1m by data.localAddress, data.remoteAddress, data.service, data.inBytes, data.outBytes | eval svc='data.service'| eval in='data.inBytes' | eval out='data.outBytes' | eval rmt='data.remoteAddress' | eval valmb=(Val / 1024 / 1024) | timechart span=1h avg(valmb) as "Bytes(MB)" by svc</query>
           <earliest>$timeRange.earliest$</earliest>
           <latest>$timeRange.latest$</latest>
           <sampleRatio>1</sampleRatio>
